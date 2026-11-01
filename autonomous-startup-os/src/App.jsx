@@ -1,1490 +1,1290 @@
 import { useState } from "react";
 import "./App.css";
+import Login from "./components/Login";
 
-function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [page, setPage] = useState("Dashboard");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
+const navigation = [
+  { name: "Dashboard", icon: "🏠" },
+  { name: "AI Assistant", icon: "🤖" },
+  { name: "Projects", icon: "📁" },
+  { name: "Tasks", icon: "✅" },
+  { name: "Customers", icon: "👥" },
+  { name: "Employees", icon: "🧑‍💼" },
+  { name: "Finance", icon: "💰" },
+  { name: "Risk Detection", icon: "🛡️" },
+  { name: "Analytics", icon: "📊" },
+  { name: "Reports", icon: "📄" },
+  { name: "Settings", icon: "⚙️" },
+];
 
-  const [projects, setProjects] = useState([
-    {
-      id: 1,
-      name: "AI Customer Platform",
-      team: "AI Team",
-      progress: 78,
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Startup Analytics",
-      team: "Analytics Team",
-      progress: 55,
-      status: "Active",
-    },
-    {
-      id: 3,
-      name: "Financial Automation",
-      team: "Finance Team",
-      progress: 35,
-      status: "Planning",
-    },
-  ]);
+const initialProjects = [
+  { id: 1, name: "Website Redesign", owner: "Priya", status: "In Progress", progress: 72 },
+  { id: 2, name: "AI Customer Support", owner: "Rahul", status: "Planning", progress: 25 },
+  { id: 3, name: "Mobile Application", owner: "Ananya", status: "In Progress", progress: 54 },
+  { id: 4, name: "Marketing Campaign", owner: "Arjun", status: "Completed", progress: 100 },
+];
 
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      title: "Update customer database",
-      employee: "Rahul",
-      status: "Completed",
-      priority: "High",
-    },
-    {
-      id: 2,
-      title: "Prepare financial report",
-      employee: "Priya",
-      status: "In Progress",
-      priority: "Medium",
-    },
-    {
-      id: 3,
-      title: "Analyze customer feedback",
-      employee: "Arjun",
-      status: "Pending",
-      priority: "High",
-    },
-  ]);
+const initialTasks = [
+  { id: 1, title: "Review project proposal", assignee: "Priya", priority: "High", done: false },
+  { id: 2, title: "Update customer dashboard", assignee: "Rahul", priority: "Medium", done: false },
+  { id: 3, title: "Prepare monthly report", assignee: "Ananya", priority: "Low", done: true },
+  { id: 4, title: "Test login functionality", assignee: "Arjun", priority: "High", done: false },
+];
 
-  const [customers, setCustomers] = useState([
-    {
-      id: 1,
-      name: "Tech Solutions",
-      email: "contact@techsolutions.com",
-      status: "Active",
-      risk: "Low",
-    },
-    {
-      id: 2,
-      name: "Global Systems",
-      email: "info@globalsystems.com",
-      status: "Active",
-      risk: "Medium",
-    },
-    {
-      id: 3,
-      name: "Smart Industries",
-      email: "hello@smartindustries.com",
-      status: "At Risk",
-      risk: "High",
-    },
-  ]);
+const initialCustomers = [
+  { id: 1, name: "Aarav Sharma", email: "aarav@example.com", company: "Aarav Technologies", status: "Active" },
+  { id: 2, name: "Meera Reddy", email: "meera@example.com", company: "Bright Solutions", status: "Active" },
+  { id: 3, name: "Kabir Patel", email: "kabir@example.com", company: "NextGen Labs", status: "Pending" },
+];
 
-  const [employees] = useState([
-    {
-      name: "Rahul Kumar",
-      role: "Software Developer",
-      department: "Technology",
-      tasks: 8,
-    },
-    {
-      name: "Priya Sharma",
-      role: "Financial Analyst",
-      department: "Finance",
-      tasks: 5,
-    },
-    {
-      name: "Arjun Reddy",
-      role: "Marketing Manager",
-      department: "Marketing",
-      tasks: 6,
-    },
-    {
-      name: "Sneha Rao",
-      role: "AI Engineer",
-      department: "AI & ML",
-      tasks: 9,
-    },
-  ]);
+const initialEmployees = [
+  { id: 1, name: "Priya Kumar", role: "Project Manager", department: "Operations" },
+  { id: 2, name: "Rahul Verma", role: "Developer", department: "Engineering" },
+  { id: 3, name: "Ananya Rao", role: "Data Analyst", department: "Analytics" },
+  { id: 4, name: "Arjun Singh", role: "Designer", department: "Product" },
+];
 
-  const login = (e) => {
-    e.preventDefault();
+function PageHeading({ title, subtitle, action, onAction }) {
+  return (
+    <div className="page-heading">
+      <div>
+        <h1>{title}</h1>
+        <p>{subtitle}</p>
+      </div>
 
-    if (
-      email === "admin@autonomousos.com" &&
-      password === "admin123"
-    ) {
-      setLoggedIn(true);
-      setLoginError("");
-    } else {
-      setLoginError(
-        "Invalid login. Use admin@autonomousos.com / admin123"
-      );
-    }
-  };
+      {action && (
+        <button className="primary-btn" onClick={onAction}>
+          {action}
+        </button>
+      )}
+    </div>
+  );
+}
 
-  if (!loggedIn) {
-    return (
-      <div className="login-page">
-        <div className="login-box">
+function StatCard({ icon, label, value, note }) {
+  return (
+    <div className="stat-card">
+      <div className="stat-card-top">
+        <span className="stat-icon">{icon}</span>
+        <span className="stat-note">{note}</span>
+      </div>
+      <p>{label}</p>
+      <h2>{value}</h2>
+    </div>
+  );
+}
 
-          <div className="brand-logo">AI</div>
+function SimpleTable({ headers, rows }) {
+  return (
+    <div className="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            {headers.map((header) => (
+              <th key={header}>{header}</th>
+            ))}
+          </tr>
+        </thead>
 
-          <h1>AUTONOMOUS OS</h1>
+        <tbody>
+          {rows.length > 0 ? (
+            rows.map((row, index) => (
+              <tr key={row.id ?? index}>
+                {row.cells.map((cell, cellIndex) => (
+                  <td key={cellIndex}>{cell}</td>
+                ))}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={headers.length} className="empty-state">
+                No records found.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
-          <p className="brand-subtitle">
-            Startup Intelligence Platform
+/* DASHBOARD */
+
+function Dashboard({ projects, tasks, customers, setActivePage }) {
+  const completedTasks = tasks.filter((task) => task.done).length;
+
+  return (
+    <>
+      <PageHeading
+        title="Dashboard"
+        subtitle="Here's what's happening with your startup today."
+      />
+
+      <div className="stat-grid">
+        <StatCard icon="💰" label="Total Revenue" value="₹4.28 L" note="+12.5%" />
+
+        <StatCard
+          icon="📁"
+          label="Active Projects"
+          value={projects.filter((project) => project.status !== "Completed").length}
+          note="+3"
+        />
+
+        <StatCard
+          icon="✅"
+          label="Pending Tasks"
+          value={tasks.filter((task) => !task.done).length}
+          note="Updated"
+        />
+
+        <StatCard
+          icon="👥"
+          label="Customers"
+          value={customers.length.toLocaleString()}
+          note="+18.2%"
+        />
+      </div>
+
+      <div className="content-grid">
+        <section className="panel">
+          <div className="panel-heading">
+            <h2>Project Overview</h2>
+            <button className="text-btn" onClick={() => setActivePage("Projects")}>
+              View all →
+            </button>
+          </div>
+
+          {projects.slice(0, 4).map((project) => (
+            <div className="progress-item" key={project.id}>
+              <div className="progress-label">
+                <strong>{project.name}</strong>
+                <span>{project.progress}%</span>
+              </div>
+
+              <div className="progress-track">
+                <div
+                  className="progress-fill"
+                  style={{ width: `${project.progress}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </section>
+
+        <section className="panel">
+          <div className="panel-heading">
+            <h2>Tasks & Activity</h2>
+            <button className="text-btn" onClick={() => setActivePage("Tasks")}>
+              View tasks →
+            </button>
+          </div>
+
+          <p className="big-number">
+            {completedTasks}
+            <span> / {tasks.length} tasks completed</span>
           </p>
 
-          <div className="login-title">
-            <h2>Welcome Back 👋</h2>
-            <p>Sign in to your autonomous startup workspace.</p>
-          </div>
+          {tasks.slice(0, 4).map((task) => (
+            <div className="activity-item" key={task.id}>
+              <span className={task.done ? "activity-check done" : "activity-check"}>
+                {task.done ? "✓" : "○"}
+              </span>
 
-          <form onSubmit={login}>
-
-            <label>Email Address</label>
-
-            <input
-              type="email"
-              placeholder="admin@autonomousos.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-
-            <label>Password</label>
-
-            <input
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-
-            {loginError && (
-              <div className="login-error">
-                {loginError}
+              <div>
+                <strong>{task.title}</strong>
+                <small>
+                  {task.assignee} · {task.priority} priority
+                </small>
               </div>
-            )}
-
-            <button className="login-btn">
-              Login →
-            </button>
-
-          </form>
-
-          <div className="demo-box">
-            <b>Demo Login</b>
-            <span>admin@autonomousos.com</span>
-            <span>Password: admin123</span>
-          </div>
-
-        </div>
+            </div>
+          ))}
+        </section>
       </div>
+
+      <section className="panel quick-actions">
+        <h2>AI Quick Actions</h2>
+
+        <div className="action-grid">
+          {[
+            "Analyze Business Performance",
+            "Identify Business Risks",
+            "Suggest Project Improvements",
+            "Analyze Financial Performance",
+          ].map((action) => (
+            <button
+              key={action}
+              className="action-card"
+              onClick={() => setActivePage("AI Assistant")}
+            >
+              🤖 <span>{action}</span> <b>→</b>
+            </button>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* AI ASSISTANT */
+
+function AIAssistant() {
+  const [prompt, setPrompt] = useState("");
+  const [answer, setAnswer] = useState("");
+
+  function askAI(question) {
+    if (!question.trim()) return;
+
+    setAnswer(
+      `Analysis for: "${question}"\n\nThis demo assistant can help organize your startup workflow. Review your project progress, pending tasks, customer feedback, and financial records. Use the relevant page to update your data, then return here for another analysis.`
     );
+
+    setPrompt(question);
   }
 
-  const menuItems = [
-    ["📊", "Dashboard"],
-    ["🤖", "AI Assistant"],
-    ["📁", "Projects"],
-    ["✓", "Tasks"],
-    ["👥", "Customers"],
-    ["👨‍💼", "Employees"],
-    ["💰", "Finance"],
-    ["⚠️", "Risk Detection"],
-    ["📈", "Analytics"],
-    ["📄", "Reports"],
+  const quickActions = [
+    "Analyze business performance",
+    "Identify business risks",
+    "Suggest project improvements",
+    "Analyze financial performance",
   ];
 
   return (
-    <div className="app">
+    <>
+      <PageHeading
+        title="AI Assistant"
+        subtitle="Ask questions and explore AI-powered startup insights."
+      />
 
-      {/* SIDEBAR */}
-
-      <aside className="sidebar">
-
-        <div className="app-brand">
-
-          <div className="brand-icon">
-            AI
-          </div>
-
-          <div>
-            <h2>AUTONOMOUS OS</h2>
-            <p>Startup Intelligence</p>
-          </div>
-
+      <section className="panel ai-panel">
+        <div className="ai-welcome">
+          <span className="ai-large-icon">🤖</span>
+          <h2>How can I help your startup?</h2>
+          <p>Choose a quick action or enter a question below.</p>
         </div>
 
-        <div className="menu-label">
-          MAIN MENU
-        </div>
-
-        {menuItems.map(([icon, name]) => (
-          <button
-            key={name}
-            className={
-              page === name
-                ? "side-button selected"
-                : "side-button"
-            }
-            onClick={() => setPage(name)}
-          >
-            <span>{icon}</span>
-            {name}
-          </button>
-        ))}
-
-        <div className="sidebar-bottom">
-
-          <button
-            className={
-              page === "Settings"
-                ? "side-button selected"
-                : "side-button"
-            }
-            onClick={() => setPage("Settings")}
-          >
-            ⚙️ Settings
-          </button>
-
-          <div className="sidebar-user">
-
-            <div className="user-avatar">
-              D
-            </div>
-
-            <div>
-              <b>Druthi</b>
-              <small>Administrator</small>
-            </div>
-
-          </div>
-
-          <button
-            className="logout-button"
-            onClick={() => setLoggedIn(false)}
-          >
-            🚪 Logout
-          </button>
-
-        </div>
-
-      </aside>
-
-
-      {/* MAIN */}
-
-      <main className="main">
-
-        {/* TOP BAR */}
-
-        <header className="topbar">
-
-          <div className="search">
-
-            🔍
-
-            <input
-              placeholder="Search apps, workflows, agents..."
-            />
-
-            <span className="shortcut">
-              Ctrl K
-            </span>
-
-          </div>
-
-          <div className="top-actions">
-
-            <button className="god-mode">
-              ⚡ God Mode
-            </button>
-
-            <button className="bell">
-              🔔
-              <span>3</span>
-            </button>
-
-            <div className="system-status">
-              <i></i>
-              All Systems Active
-            </div>
-
-          </div>
-
-        </header>
-
-
-        {/* PAGE */}
-
-        {page === "Dashboard" && (
-          <Dashboard
-            setPage={setPage}
-            projects={projects}
-            tasks={tasks}
-            customers={customers}
-          />
-        )}
-
-        {page === "AI Assistant" && (
-          <AIAssistant />
-        )}
-
-        {page === "Projects" && (
-          <Projects
-            projects={projects}
-            setProjects={setProjects}
-          />
-        )}
-
-        {page === "Tasks" && (
-          <Tasks
-            tasks={tasks}
-            setTasks={setTasks}
-          />
-        )}
-
-        {page === "Customers" && (
-          <Customers
-            customers={customers}
-            setCustomers={setCustomers}
-          />
-        )}
-
-        {page === "Employees" && (
-          <Employees employees={employees} />
-        )}
-
-        {page === "Finance" && (
-          <Finance />
-        )}
-
-        {page === "Risk Detection" && (
-          <RiskDetection />
-        )}
-
-        {page === "Analytics" && (
-          <Analytics />
-        )}
-
-        {page === "Reports" && (
-          <Reports />
-        )}
-
-        {page === "Settings" && (
-          <Settings setLoggedIn={setLoggedIn} />
-        )}
-
-      </main>
-
-    </div>
-  );
-}
-
-
-/* =====================================================
-   DASHBOARD
-===================================================== */
-
-function Dashboard({ setPage }) {
-  return (
-    <div className="page">
-
-      <div className="hero">
-
-        <div>
-
-          <span className="badge">
-            AUTONOMOUS OS v1.0
-          </span>
-
-          <h1>
-            Welcome to <span>AUTONOMOUS OS</span>
-          </h1>
-
-          <p>
-            Your autonomous startup operating system.
-            Build, manage and grow your startup with
-            AI-powered intelligence and automation.
-          </p>
-
-          <div className="hero-buttons">
-
+        <div className="action-grid">
+          {quickActions.map((action) => (
             <button
-              className="primary-btn"
-              onClick={() => setPage("Projects")}
+              className="action-card"
+              key={action}
+              onClick={() => askAI(action)}
             >
-              ⚡ Start Building
+              ✨ <span>{action}</span> <b>→</b>
             </button>
-
-            <button className="secondary-btn">
-              View Documentation →
-            </button>
-
-          </div>
-
-        </div>
-
-        <div className="hero-ai">
-          🤖
-        </div>
-
-      </div>
-
-
-      {/* STAT CARDS */}
-
-      <div className="stat-grid">
-
-        <Stat
-          icon="💰"
-          value="₹4.28 L"
-          title="Total Revenue"
-          change="+12.5%"
-        />
-
-        <Stat
-          icon="📁"
-          value="18"
-          title="Active Projects"
-          change="+3"
-        />
-
-        <Stat
-          icon="✓"
-          value="24"
-          title="Pending Tasks"
-          change="8 Due Today"
-        />
-
-        <Stat
-          icon="👥"
-          value="1,248"
-          title="Customers"
-          change="+18.2%"
-        />
-
-      </div>
-
-
-      <div className="two-column">
-
-        {/* PERFORMANCE */}
-
-        <div className="panel">
-
-          <div className="panel-heading">
-
-            <div>
-              <h2>Business Performance</h2>
-              <p>Monthly startup growth</p>
-            </div>
-
-            <select>
-              <option>Last 6 Months</option>
-              <option>Last Year</option>
-            </select>
-
-          </div>
-
-          <div className="chart">
-
-            <div className="bar b1"></div>
-            <div className="bar b2"></div>
-            <div className="bar b3"></div>
-            <div className="bar b4"></div>
-            <div className="bar b5"></div>
-            <div className="bar b6"></div>
-
-          </div>
-
-          <div className="chart-labels">
-            <span>Apr</span>
-            <span>May</span>
-            <span>Jun</span>
-            <span>Jul</span>
-            <span>Aug</span>
-            <span>Sep</span>
-          </div>
-
-        </div>
-
-
-        {/* AI RECOMMENDATIONS */}
-
-        <div className="panel">
-
-          <div className="panel-heading">
-
-            <div>
-              <h2>AI Recommendations</h2>
-              <p>Smart insights for your business</p>
-            </div>
-
-            <span className="ai-badge">
-              AI
-            </span>
-
-          </div>
-
-          <Recommendation
-            icon="📈"
-            title="Revenue Opportunity"
-            text="Potential 15% revenue increase detected."
-          />
-
-          <Recommendation
-            icon="⚡"
-            title="Improve Productivity"
-            text="8 tasks are approaching their deadlines."
-          />
-
-          <Recommendation
-            icon="⚠️"
-            title="Risk Detected"
-            text="Customer churn probability has increased."
-          />
-
-          <button
-            className="text-btn"
-            onClick={() => setPage("Risk Detection")}
-          >
-            View All Recommendations →
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <div className="two-column">
-
-        {/* RECENT ACTIVITY */}
-
-        <div className="panel">
-
-          <div className="panel-heading">
-
-            <div>
-              <h2>Recent Activity</h2>
-              <p>Latest startup activities</p>
-            </div>
-
-            <button className="text-btn">
-              View All
-            </button>
-
-          </div>
-
-          <Activity
-            icon="✓"
-            title="Customer database updated"
-            time="5 minutes ago"
-            status="Success"
-          />
-
-          <Activity
-            icon="⚡"
-            title="AI business analysis completed"
-            time="12 minutes ago"
-            status="Active"
-          />
-
-          <Activity
-            icon="🤖"
-            title='AI Agent "Risk Detector" executed'
-            time="1 hour ago"
-            status="Success"
-          />
-
-          <Activity
-            icon="⚠️"
-            title="Customer churn risk detected"
-            time="2 hours ago"
-            status="Warning"
-          />
-
-        </div>
-
-
-        {/* QUICK ACTIONS */}
-
-        <div className="panel">
-
-          <h2>Quick Actions</h2>
-
-          <button
-            className="quick-action"
-            onClick={() => setPage("Projects")}
-          >
-            📁 New Project
-          </button>
-
-          <button
-            className="quick-action"
-            onClick={() => setPage("Tasks")}
-          >
-            ✓ New Task
-          </button>
-
-          <button
-            className="quick-action"
-            onClick={() => setPage("Customers")}
-          >
-            👥 Add Customer
-          </button>
-
-          <button
-            className="quick-action primary-action"
-            onClick={() => setPage("AI Assistant")}
-          >
-            🤖 Open AI Assistant
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-  );
-}
-
-
-/* =====================================================
-   AI ASSISTANT
-===================================================== */
-
-function AIAssistant() {
-
-  const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState([]);
-
-  const answer = () => {
-
-    if (!question.trim()) return;
-
-    let response =
-      "I can help you analyze your startup's projects, tasks, customers, finance and risks.";
-
-    const q = question.toLowerCase();
-
-    if (q.includes("revenue")) {
-      response =
-        "Your current total revenue is ₹4.28 L and revenue growth is 12.5%.";
-    }
-
-    if (q.includes("customer")) {
-      response =
-        "Your startup currently has 1,248 customers. Customer churn risk should be monitored.";
-    }
-
-    if (q.includes("task")) {
-      response =
-        "There are 24 pending tasks and 8 tasks are due today.";
-    }
-
-    if (q.includes("project")) {
-      response =
-        "There are 18 active projects. Regular progress monitoring is recommended.";
-    }
-
-    if (q.includes("risk")) {
-      response =
-        "A high customer churn risk has been detected. Review customer feedback and engagement.";
-    }
-
-    setMessages([
-      ...messages,
-      { type: "user", text: question },
-      { type: "ai", text: response },
-    ]);
-
-    setQuestion("");
-  };
-
-  return (
-    <div className="page">
-
-      <div className="page-title">
-        <h1>AI Assistant</h1>
-        <p>
-          Your intelligent startup business assistant.
-        </p>
-      </div>
-
-      <div className="ai-panel">
-
-        <div className="ai-header">
-          <div className="large-ai">
-            🤖
-          </div>
-
-          <div>
-            <h2>Startup AI Assistant</h2>
-            <p>
-              Ask me anything about your business.
-            </p>
-          </div>
-        </div>
-
-        <div className="chat-area">
-
-          {messages.length === 0 && (
-            <div className="welcome-ai">
-              <div>🤖</div>
-              <h2>Hello, Druthi 👋</h2>
-              <p>
-                How can I help you manage your startup today?
-              </p>
-            </div>
-          )}
-
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={
-                msg.type === "user"
-                  ? "chat-user"
-                  : "chat-ai"
-              }
-            >
-              <b>
-                {msg.type === "user"
-                  ? "You"
-                  : "AI Assistant"}
-              </b>
-              <p>{msg.text}</p>
-            </div>
           ))}
-
         </div>
 
-        <div className="ai-suggestions">
-
-          <button
-            onClick={() => setQuestion("Analyze my revenue")}
-          >
-            📊 Revenue Analysis
-          </button>
-
-          <button
-            onClick={() => setQuestion("What are my risks?")}
-          >
-            ⚠️ Risk Analysis
-          </button>
-
-          <button
-            onClick={() => setQuestion("Analyze my projects")}
-          >
-            📁 Project Analysis
-          </button>
-
-          <button
-            onClick={() => setQuestion("How many tasks are pending?")}
-          >
-            ✓ Task Analysis
-          </button>
-
-        </div>
-
-        <div className="chat-input">
-
+        <form
+          className="ai-input-row"
+          onSubmit={(event) => {
+            event.preventDefault();
+            askAI(prompt);
+          }}
+        >
           <input
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") answer();
-            }}
-            placeholder="Ask your AI assistant..."
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+            placeholder="Ask about projects, finance, customers..."
           />
 
-          <button onClick={answer}>
-            Send ➤
+          <button className="primary-btn" type="submit">
+            Ask AI
           </button>
+        </form>
 
-        </div>
+        {answer && (
+          <div className="ai-answer">
+            <h3>AI Insight</h3>
+            <p>{answer}</p>
+          </div>
+        )}
 
-      </div>
-
-    </div>
+        <p className="small-note">
+          Demo interface: this sample response is generated locally and is not
+          connected to a live AI model.
+        </p>
+      </section>
+    </>
   );
 }
 
-
-/* =====================================================
-   PROJECTS
-===================================================== */
+/* PROJECTS */
 
 function Projects({ projects, setProjects }) {
-
   const [name, setName] = useState("");
+  const [owner, setOwner] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
-  const addProject = () => {
+  function addProject(event) {
+    event.preventDefault();
 
     if (!name.trim()) return;
 
-    setProjects([
-      ...projects,
+    setProjects((items) => [
+      ...items,
       {
         id: Date.now(),
-        name,
-        team: "New Team",
-        progress: 0,
+        name: name.trim(),
+        owner: owner.trim() || "Unassigned",
         status: "Planning",
+        progress: 0,
       },
     ]);
 
     setName("");
-  };
+    setOwner("");
+    setShowForm(false);
+  }
 
   return (
-    <div className="page">
+    <>
+      <PageHeading
+        title="Projects"
+        subtitle="Create projects and track their progress."
+        action={showForm ? "Cancel" : "+ New Project"}
+        onAction={() => setShowForm(!showForm)}
+      />
 
-      <div className="page-title">
-        <h1>Projects</h1>
-        <p>Manage all startup projects.</p>
-      </div>
+      {showForm && (
+        <form className="panel inline-form" onSubmit={addProject}>
+          <input
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            placeholder="Project name"
+            required
+          />
 
-      <div className="add-box">
+          <input
+            value={owner}
+            onChange={(event) => setOwner(event.target.value)}
+            placeholder="Project owner"
+          />
 
-        <input
-          placeholder="Enter new project name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+          <button className="primary-btn">Add Project</button>
+        </form>
+      )}
 
-        <button onClick={addProject}>
-          + Add Project
-        </button>
-
-      </div>
-
-      <div className="project-grid">
-
-        {projects.map((project) => (
-          <div className="project-card" key={project.id}>
-
-            <div className="project-top">
-              <span>📁</span>
-              <span className="status">
+      <section className="panel">
+        <SimpleTable
+          headers={["Project", "Owner", "Status", "Progress"]}
+          rows={projects.map((project) => ({
+            id: project.id,
+            cells: [
+              project.name,
+              project.owner,
+              <span className="status-pill" key="status">
                 {project.status}
-              </span>
-            </div>
-
-            <h2>{project.name}</h2>
-
-            <p>{project.team}</p>
-
-            <div className="progress-label">
-              <span>Progress</span>
-              <b>{project.progress}%</b>
-            </div>
-
-            <div className="progress-bar">
-              <div
-                style={{
-                  width: `${project.progress}%`,
-                }}
-              ></div>
-            </div>
-
-          </div>
-        ))}
-
-      </div>
-
-    </div>
+              </span>,
+              `${project.progress}%`,
+            ],
+          }))}
+        />
+      </section>
+    </>
   );
 }
 
-
-/* =====================================================
-   TASKS
-===================================================== */
+/* TASKS */
 
 function Tasks({ tasks, setTasks }) {
-
   const [title, setTitle] = useState("");
+  const [assignee, setAssignee] = useState("");
 
-  const addTask = () => {
+  function addTask(event) {
+    event.preventDefault();
 
     if (!title.trim()) return;
 
-    setTasks([
-      ...tasks,
+    setTasks((items) => [
+      ...items,
       {
         id: Date.now(),
-        title,
-        employee: "Unassigned",
-        status: "Pending",
+        title: title.trim(),
+        assignee: assignee.trim() || "Unassigned",
         priority: "Medium",
+        done: false,
       },
     ]);
 
     setTitle("");
-  };
+    setAssignee("");
+  }
 
   return (
-    <div className="page">
+    <>
+      <PageHeading
+        title="Tasks"
+        subtitle="Create tasks and mark work as completed."
+      />
 
-      <div className="page-title">
-        <h1>Tasks</h1>
-        <p>Manage startup tasks and team activities.</p>
-      </div>
-
-      <div className="add-box">
-
+      <form className="panel inline-form" onSubmit={addTask}>
         <input
-          placeholder="Enter task"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Enter a task"
+          required
         />
 
-        <button onClick={addTask}>
-          + Add Task
-        </button>
+        <input
+          value={assignee}
+          onChange={(event) => setAssignee(event.target.value)}
+          placeholder="Assign to"
+        />
 
-      </div>
+        <button className="primary-btn">Add Task</button>
+      </form>
 
-      <div className="table-panel">
+      <section className="panel task-list">
+        {tasks.map((task) => (
+          <div className="task-row" key={task.id}>
+            <label>
+              <input
+                type="checkbox"
+                checked={task.done}
+                onChange={() =>
+                  setTasks((items) =>
+                    items.map((item) =>
+                      item.id === task.id
+                        ? { ...item, done: !item.done }
+                        : item
+                    )
+                  )
+                }
+              />
 
-        <table>
+              <span className={task.done ? "task-done" : ""}>
+                {task.title}
+              </span>
+            </label>
 
-          <thead>
-            <tr>
-              <th>Task</th>
-              <th>Assigned To</th>
-              <th>Priority</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+            <span>{task.assignee}</span>
 
-          <tbody>
-
-            {tasks.map((task) => (
-              <tr key={task.id}>
-
-                <td>{task.title}</td>
-                <td>{task.employee}</td>
-                <td>
-                  <span className="priority">
-                    {task.priority}
-                  </span>
-                </td>
-                <td>
-                  <span className="status">
-                    {task.status}
-                  </span>
-                </td>
-
-              </tr>
-            ))}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </div>
+            <span className="status-pill">
+              {task.done ? "Completed" : task.priority}
+            </span>
+          </div>
+        ))}
+      </section>
+    </>
   );
 }
 
-
-/* =====================================================
-   CUSTOMERS
-===================================================== */
+/* CUSTOMERS */
 
 function Customers({ customers, setCustomers }) {
-
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
 
-  const addCustomer = () => {
+  function addCustomer(event) {
+    event.preventDefault();
 
     if (!name.trim()) return;
 
-    setCustomers([
-      ...customers,
+    setCustomers((items) => [
+      ...items,
       {
         id: Date.now(),
-        name,
-        email: "newcustomer@example.com",
+        name: name.trim(),
+        email: email.trim(),
+        company: company.trim() || "—",
         status: "Active",
-        risk: "Low",
       },
     ]);
 
     setName("");
-  };
+    setEmail("");
+    setCompany("");
+  }
 
   return (
-    <div className="page">
+    <>
+      <PageHeading
+        title="Customers"
+        subtitle="Manage customer contacts and account status."
+      />
 
-      <div className="page-title">
-        <h1>Customers</h1>
-        <p>Manage customers and monitor customer health.</p>
-      </div>
-
-      <div className="add-box">
+      <form className="panel inline-form" onSubmit={addCustomer}>
+        <input
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          placeholder="Customer name"
+          required
+        />
 
         <input
-          placeholder="Customer name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="Email address"
         />
 
-        <button onClick={addCustomer}>
-          + Add Customer
-        </button>
+        <input
+          value={company}
+          onChange={(event) => setCompany(event.target.value)}
+          placeholder="Company"
+        />
 
-      </div>
+        <button className="primary-btn">Add Customer</button>
+      </form>
 
-      <div className="customer-grid">
-
-        {customers.map((customer) => (
-          <div className="customer-card" key={customer.id}>
-
-            <div className="customer-avatar">
-              {customer.name.charAt(0)}
-            </div>
-
-            <div>
-              <h3>{customer.name}</h3>
-              <p>{customer.email}</p>
-
-              <span className="status">
+      <section className="panel">
+        <SimpleTable
+          headers={["Name", "Email", "Company", "Status"]}
+          rows={customers.map((customer) => ({
+            id: customer.id,
+            cells: [
+              customer.name,
+              customer.email || "—",
+              customer.company,
+              <span className="status-pill" key="status">
                 {customer.status}
-              </span>
-
-              <span className="risk">
-                Risk: {customer.risk}
-              </span>
-            </div>
-
-          </div>
-        ))}
-
-      </div>
-
-    </div>
+              </span>,
+            ],
+          }))}
+        />
+      </section>
+    </>
   );
 }
 
+/* EMPLOYEES */
 
-/* =====================================================
-   EMPLOYEES
-===================================================== */
+function Employees({ employees, setEmployees }) {
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("");
+  const [department, setDepartment] = useState("");
 
-function Employees({ employees }) {
+  function addEmployee(event) {
+    event.preventDefault();
+
+    if (!name.trim()) return;
+
+    setEmployees((items) => [
+      ...items,
+      {
+        id: Date.now(),
+        name: name.trim(),
+        role: role.trim() || "Team Member",
+        department: department.trim() || "General",
+      },
+    ]);
+
+    setName("");
+    setRole("");
+    setDepartment("");
+  }
 
   return (
-    <div className="page">
+    <>
+      <PageHeading
+        title="Employees"
+        subtitle="View your team and add team members."
+      />
 
-      <div className="page-title">
-        <h1>Employees</h1>
-        <p>Manage your startup team.</p>
-      </div>
+      <form className="panel inline-form" onSubmit={addEmployee}>
+        <input
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          placeholder="Employee name"
+          required
+        />
 
-      <div className="employee-grid">
+        <input
+          value={role}
+          onChange={(event) => setRole(event.target.value)}
+          placeholder="Role"
+        />
 
-        {employees.map((employee) => (
-          <div className="employee-card" key={employee.name}>
+        <input
+          value={department}
+          onChange={(event) => setDepartment(event.target.value)}
+          placeholder="Department"
+        />
 
-            <div className="employee-avatar">
-              {employee.name.charAt(0)}
-            </div>
+        <button className="primary-btn">Add Employee</button>
+      </form>
 
-            <h2>{employee.name}</h2>
-
-            <p>{employee.role}</p>
-
-            <span>
-              {employee.department}
-            </span>
-
-            <div className="employee-tasks">
-              {employee.tasks} active tasks
-            </div>
-
-          </div>
-        ))}
-
-      </div>
-
-    </div>
+      <section className="panel">
+        <SimpleTable
+          headers={["Employee", "Role", "Department"]}
+          rows={employees.map((employee) => ({
+            id: employee.id,
+            cells: [employee.name, employee.role, employee.department],
+          }))}
+        />
+      </section>
+    </>
   );
 }
 
-
-/* =====================================================
-   FINANCE
-===================================================== */
+/* FINANCE */
 
 function Finance() {
+  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState("");
+  const [type, setType] = useState("Income");
+
+  const [entries, setEntries] = useState([
+    { id: 1, amount: 428000, description: "Sales revenue", type: "Income" },
+    { id: 2, amount: 85000, description: "Operating expenses", type: "Expense" },
+  ]);
+
+  const income = entries
+    .filter((entry) => entry.type === "Income")
+    .reduce((sum, entry) => sum + entry.amount, 0);
+
+  const expenses = entries
+    .filter((entry) => entry.type === "Expense")
+    .reduce((sum, entry) => sum + entry.amount, 0);
+
+  function addEntry(event) {
+    event.preventDefault();
+
+    if (!Number(amount) || Number(amount) <= 0) return;
+
+    setEntries((items) => [
+      ...items,
+      {
+        id: Date.now(),
+        amount: Number(amount),
+        description: description.trim() || "Entry",
+        type,
+      },
+    ]);
+
+    setAmount("");
+    setDescription("");
+  }
 
   return (
-    <div className="page">
+    <>
+      <PageHeading
+        title="Finance"
+        subtitle="Track income, expenses, and your current balance."
+      />
 
-      <div className="page-title">
-        <h1>Finance</h1>
-        <p>Monitor your startup financial performance.</p>
-      </div>
-
-      <div className="finance-grid">
-
-        <Stat
-          icon="💰"
-          value="₹4.28 L"
-          title="Revenue"
-          change="+12.5%"
-        />
-
-        <Stat
-          icon="💸"
-          value="₹1.62 L"
-          title="Expenses"
-          change="+5.2%"
-        />
-
-        <Stat
+      <div className="stat-grid">
+        <StatCard
           icon="📈"
-          value="₹2.66 L"
-          title="Profit"
-          change="+18.7%"
+          label="Income"
+          value={`₹${income.toLocaleString("en-IN")}`}
+          note="Total"
         />
 
+        <StatCard
+          icon="📉"
+          label="Expenses"
+          value={`₹${expenses.toLocaleString("en-IN")}`}
+          note="Total"
+        />
+
+        <StatCard
+          icon="💳"
+          label="Net Balance"
+          value={`₹${(income - expenses).toLocaleString("en-IN")}`}
+          note="Balance"
+        />
       </div>
 
-      <div className="panel">
+      <form className="panel inline-form" onSubmit={addEntry}>
+        <select value={type} onChange={(event) => setType(event.target.value)}>
+          <option>Income</option>
+          <option>Expense</option>
+        </select>
 
-        <h2>Financial Overview</h2>
+        <input
+          type="number"
+          min="1"
+          value={amount}
+          onChange={(event) => setAmount(event.target.value)}
+          placeholder="Amount (₹)"
+          required
+        />
 
-        <div className="finance-chart">
+        <input
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          placeholder="Description"
+        />
 
-          <div style={{ height: "45%" }}></div>
-          <div style={{ height: "65%" }}></div>
-          <div style={{ height: "55%" }}></div>
-          <div style={{ height: "78%" }}></div>
-          <div style={{ height: "70%" }}></div>
-          <div style={{ height: "92%" }}></div>
+        <button className="primary-btn">Add Entry</button>
+      </form>
 
-        </div>
-
-      </div>
-
-    </div>
+      <section className="panel">
+        <SimpleTable
+          headers={["Description", "Type", "Amount"]}
+          rows={entries.map((entry) => ({
+            id: entry.id,
+            cells: [
+              entry.description,
+              entry.type,
+              `₹${entry.amount.toLocaleString("en-IN")}`,
+            ],
+          }))}
+        />
+      </section>
+    </>
   );
 }
 
-
-/* =====================================================
-   RISK
-===================================================== */
+/* RISK DETECTION */
 
 function RiskDetection() {
+  const [checked, setChecked] = useState(false);
 
   return (
-    <div className="page">
+    <>
+      <PageHeading
+        title="Risk Detection"
+        subtitle="Review sample business risks and recommended actions."
+        action="Run Risk Scan"
+        onAction={() => setChecked(true)}
+      />
 
-      <div className="page-title">
-        <h1>Risk Detection</h1>
-        <p>AI-powered startup risk monitoring.</p>
-      </div>
+      {checked && (
+        <div className="notice">
+          Demo scan complete. Review the sample risk items below.
+        </div>
+      )}
 
       <div className="risk-grid">
+        <div className="risk-card risk-high">
+          <span>HIGH RISK</span>
+          <h3>Cash-flow pressure</h3>
+          <p>Monitor upcoming payments and maintain an operating reserve.</p>
+          <strong>Recommended: Update cash-flow forecast</strong>
+        </div>
 
-        <Risk
-          icon="🔴"
-          title="Customer Churn"
-          level="High"
-          text="Customer churn probability has increased."
-        />
+        <div className="risk-card risk-medium">
+          <span>MEDIUM RISK</span>
+          <h3>Project deadline</h3>
+          <p>One project may need additional time to meet its target date.</p>
+          <strong>Recommended: Review task assignments</strong>
+        </div>
 
-        <Risk
-          icon="🟡"
-          title="Project Delay"
-          level="Medium"
-          text="Some project deadlines are approaching."
-        />
-
-        <Risk
-          icon="🟢"
-          title="Financial Stability"
-          level="Low"
-          text="Current financial performance is stable."
-        />
-
+        <div className="risk-card risk-low">
+          <span>LOW RISK</span>
+          <h3>Customer follow-up</h3>
+          <p>Some customer contacts may need a follow-up.</p>
+          <strong>Recommended: Schedule customer check-ins</strong>
+        </div>
       </div>
 
-    </div>
+      <p className="small-note">
+        These are example risks, not a live analysis of your business.
+      </p>
+    </>
   );
 }
 
-
-/* =====================================================
-   ANALYTICS
-===================================================== */
+/* ANALYTICS */
 
 function Analytics() {
+  const data = [
+    { label: "Jan", value: 45 },
+    { label: "Feb", value: 62 },
+    { label: "Mar", value: 55 },
+    { label: "Apr", value: 78 },
+    { label: "May", value: 90 },
+    { label: "Jun", value: 72 },
+  ];
 
   return (
-    <div className="page">
+    <>
+      <PageHeading
+        title="Analytics"
+        subtitle="A simple overview of sample startup performance."
+      />
 
-      <div className="page-title">
-        <h1>Analytics</h1>
-        <p>Business intelligence and performance analytics.</p>
+      <div className="stat-grid">
+        <StatCard icon="📊" label="Growth" value="18.2%" note="Sample" />
+        <StatCard icon="🎯" label="Conversion" value="6.8%" note="Sample" />
+        <StatCard icon="⭐" label="Customer rating" value="4.7/5" note="Sample" />
       </div>
 
-      <div className="analytics-grid">
+      <section className="panel">
+        <h2>Monthly Performance</h2>
 
-        <div className="panel">
-          <h2>Revenue Growth</h2>
-          <h1>+12.5%</h1>
-          <p>Compared with previous period</p>
+        <div className="bar-chart">
+          {data.map((item) => (
+            <div className="bar-column" key={item.label}>
+              <span>{item.value}</span>
+              <div className="bar" style={{ height: `${item.value}%` }} />
+              <small>{item.label}</small>
+            </div>
+          ))}
         </div>
+      </section>
 
-        <div className="panel">
-          <h2>Customer Growth</h2>
-          <h1>+18.2%</h1>
-          <p>Customer base is growing</p>
-        </div>
-
-        <div className="panel">
-          <h2>Productivity</h2>
-          <h1>86%</h1>
-          <p>Overall team productivity</p>
-        </div>
-
-      </div>
-
-    </div>
+      <p className="small-note">
+        Chart values are sample data for demonstration.
+      </p>
+    </>
   );
 }
 
+/* UPDATED REPORTS COMPONENT */
 
-/* =====================================================
-   REPORTS
-===================================================== */
+function Reports({ projects, tasks, customers, employees }) {
+  const [report, setReport] = useState("Business Summary");
+  const [showPreview, setShowPreview] = useState(false);
 
-function Reports() {
+  function getReportData() {
+    switch (report) {
+      case "Project Status":
+        return projects.map((project) => ({
+          Project: project.name,
+          Owner: project.owner,
+          Status: project.status,
+          Progress: `${project.progress}%`,
+        }));
+
+      case "Task Completion":
+        return tasks.map((task) => ({
+          Task: task.title,
+          Assignee: task.assignee,
+          Priority: task.priority,
+          Status: task.done ? "Completed" : "Pending",
+        }));
+
+      case "Customer Overview":
+        return customers.map((customer) => ({
+          Customer: customer.name,
+          Email: customer.email || "—",
+          Company: customer.company,
+          Status: customer.status,
+        }));
+
+      case "Employee Directory":
+        return employees.map((employee) => ({
+          Employee: employee.name,
+          Role: employee.role,
+          Department: employee.department,
+        }));
+
+      default:
+        return [
+          { Metric: "Total Projects", Value: projects.length },
+          {
+            Metric: "Active Projects",
+            Value: projects.filter(
+              (project) => project.status !== "Completed"
+            ).length,
+          },
+          { Metric: "Total Tasks", Value: tasks.length },
+          {
+            Metric: "Completed Tasks",
+            Value: tasks.filter((task) => task.done).length,
+          },
+          {
+            Metric: "Pending Tasks",
+            Value: tasks.filter((task) => !task.done).length,
+          },
+          { Metric: "Total Customers", Value: customers.length },
+          { Metric: "Total Employees", Value: employees.length },
+        ];
+    }
+  }
+
+  const reportData = getReportData();
+  const headers = reportData.length ? Object.keys(reportData[0]) : [];
+
+  function downloadCSV() {
+    if (reportData.length === 0) {
+      alert("No data available for this report.");
+      return;
+    }
+
+    const csvHeaders = headers.join(",");
+
+    const csvRows = reportData.map((row) =>
+      headers
+        .map((header) => {
+          const value = String(row[header] ?? "");
+          return `"${value.replace(/"/g, '""')}"`;
+        })
+        .join(",")
+    );
+
+    const csvContent = [csvHeaders, ...csvRows].join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `${report.replace(/\s+/g, "_")}_Report.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  }
+
+  function printReport() {
+    if (reportData.length === 0) {
+      alert("No data available to print.");
+      return;
+    }
+
+    const printWindow = window.open("", "_blank");
+
+    if (!printWindow) {
+      alert("Please allow pop-ups to print or save the report.");
+      return;
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    const tableHeaders = headers
+      .map((header) => `<th>${escapeHTML(header)}</th>`)
+      .join("");
+
+    const tableRows = reportData
+      .map(
+        (row) => `
+          <tr>
+            ${headers
+              .map((header) => `<td>${escapeHTML(row[header])}</td>`)
+              .join("")}
+          </tr>
+        `
+      )
+      .join("");
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${escapeHTML(report)} Report</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 30px;
+              color: #333;
+            }
+            h1 {
+              margin-bottom: 20px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 10px;
+              text-align: left;
+            }
+            th {
+              background-color: #f4f4f4;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>${escapeHTML(report)} Report</h1>
+          <table>
+            <thead><tr>${tableHeaders}</tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  }
 
   return (
-    <div className="page">
+    <>
+      <PageHeading
+        title="Reports"
+        subtitle="Choose a report type to generate, preview, and export."
+      />
 
-      <div className="page-title">
-        <h1>Reports</h1>
-        <p>Generate and manage startup reports.</p>
-      </div>
+      <section className="panel report-panel">
+        <h2>Create a Report</h2>
 
-      <div className="report-grid">
+        <label htmlFor="report-type">Report type</label>
 
-        <Report
-          icon="💰"
-          title="Financial Report"
-          text="Revenue, expenses and profit analysis."
-        />
-
-        <Report
-          icon="📁"
-          title="Project Report"
-          text="Project progress and performance."
-        />
-
-        <Report
-          icon="👥"
-          title="Customer Report"
-          text="Customer growth and churn analysis."
-        />
-
-        <Report
-          icon="👨‍💼"
-          title="Employee Report"
-          text="Team workload and productivity."
-        />
-
-      </div>
-
-    </div>
-  );
-}
-
-
-/* =====================================================
-   SETTINGS
-===================================================== */
-
-function Settings({ setLoggedIn }) {
-
-  return (
-    <div className="page">
-
-      <div className="page-title">
-        <h1>Settings</h1>
-        <p>Manage your Autonomous OS account.</p>
-      </div>
-
-      <div className="settings-panel">
-
-        <h2>Profile</h2>
-
-        <div className="setting-row">
-          <span>Name</span>
-          <b>Druthi</b>
-        </div>
-
-        <div className="setting-row">
-          <span>Role</span>
-          <b>Administrator</b>
-        </div>
-
-        <div className="setting-row">
-          <span>Email</span>
-          <b>admin@autonomousos.com</b>
-        </div>
-
-        <h2>System</h2>
-
-        <div className="setting-row">
-          <span>AI Services</span>
-          <b className="online">Active</b>
-        </div>
-
-        <div className="setting-row">
-          <span>Notifications</span>
-          <b className="online">Enabled</b>
-        </div>
-
-        <button
-          className="danger-btn"
-          onClick={() => setLoggedIn(false)}
+        <select
+          id="report-type"
+          value={report}
+          onChange={(event) => {
+            setReport(event.target.value);
+            setShowPreview(false);
+          }}
         >
-          Logout
-        </button>
+          <option>Business Summary</option>
+          <option>Project Status</option>
+          <option>Task Completion</option>
+          <option>Customer Overview</option>
+          <option>Employee Directory</option>
+        </select>
 
-      </div>
-
-    </div>
-  );
-}
-
-
-/* =====================================================
-   SMALL COMPONENTS
-===================================================== */
-
-function Stat({ icon, value, title, change }) {
-
-  return (
-    <div className="stat-card">
-
-      <div className="stat-top">
-        <div className="stat-icon">
-          {icon}
+        <div style={{ display: "flex", gap: "10px", marginTop: "15px" }}>
+          <button
+            className="primary-btn"
+            onClick={() => setShowPreview(true)}
+          >
+            Generate & Preview
+          </button>
+          <button className="primary-btn" onClick={downloadCSV}>
+            Download CSV
+          </button>
+          <button className="primary-btn" onClick={printReport}>
+            Print / Save PDF
+          </button>
         </div>
 
-        <span>
-          {change}
-        </span>
-      </div>
-
-      <p>{title}</p>
-
-      <h2>{value}</h2>
-
-    </div>
+        {showPreview && (
+          <div style={{ marginTop: "20px" }}>
+            <h3>Preview: {report}</h3>
+            <SimpleTable
+              headers={headers}
+              rows={reportData.map((row, idx) => ({
+                id: idx,
+                cells: headers.map((h) => row[h]),
+              }))}
+            />
+          </div>
+        )}
+      </section>
+    </>
   );
 }
 
+/* SETTINGS */
 
-function Recommendation({ icon, title, text }) {
+function Settings() {
+  const [company, setCompany] = useState("Autonomous OS");
+  const [email, setEmail] = useState("admin@autonomousos.com");
+  const [saved, setSaved] = useState(false);
 
   return (
-    <div className="recommendation">
+    <>
+      <PageHeading
+        title="Settings"
+        subtitle="Update your workspace details."
+      />
 
-      <span>
-        {icon}
-      </span>
+      <form
+        className="panel settings-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setSaved(true);
+        }}
+      >
+        <h2>Workspace Settings</h2>
 
-      <div>
-        <b>{title}</b>
-        <p>{text}</p>
-      </div>
+        <label htmlFor="company-name">Workspace name</label>
+        <input
+          id="company-name"
+          value={company}
+          onChange={(event) => {
+            setCompany(event.target.value);
+            setSaved(false);
+          }}
+        />
 
-    </div>
+        <label htmlFor="admin-email">Administrator email</label>
+        <input
+          id="admin-email"
+          type="email"
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            setSaved(false);
+          }}
+        />
+
+        <button className="primary-btn">Save Settings</button>
+
+        {saved && (
+          <div className="notice">
+            Settings saved in this page session.
+          </div>
+        )}
+      </form>
+    </>
   );
 }
 
+/* MAIN APP */
 
-function Activity({ icon, title, time, status }) {
+export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    () => localStorage.getItem("autonomousOSLoggedIn") === "true"
+  );
+
+  const [activePage, setActivePage] = useState("Dashboard");
+
+  const [projects, setProjects] = useState(initialProjects);
+  const [tasks, setTasks] = useState(initialTasks);
+  const [customers, setCustomers] = useState(initialCustomers);
+  const [employees, setEmployees] = useState(initialEmployees);
+
+  if (!isLoggedIn) {
+    return (
+      <Login
+        onLogin={() => {
+          localStorage.setItem("autonomousOSLoggedIn", "true");
+          setIsLoggedIn(true);
+        }}
+      />
+    );
+  }
+
+  function logout() {
+    localStorage.removeItem("autonomousOSLoggedIn");
+    setIsLoggedIn(false);
+  }
+
+  function renderPage() {
+    switch (activePage) {
+      case "Dashboard":
+        return (
+          <Dashboard
+            projects={projects}
+            tasks={tasks}
+            customers={customers}
+            setActivePage={setActivePage}
+          />
+        );
+
+      case "AI Assistant":
+        return <AIAssistant />;
+
+      case "Projects":
+        return (
+          <Projects
+            projects={projects}
+            setProjects={setProjects}
+          />
+        );
+
+      case "Tasks":
+        return <Tasks tasks={tasks} setTasks={setTasks} />;
+
+      case "Customers":
+        return (
+          <Customers
+            customers={customers}
+            setCustomers={setCustomers}
+          />
+        );
+
+      case "Employees":
+        return (
+          <Employees
+            employees={employees}
+            setEmployees={setEmployees}
+          />
+        );
+
+      case "Finance":
+        return <Finance />;
+
+      case "Risk Detection":
+        return <RiskDetection />;
+
+      case "Analytics":
+        return <Analytics />;
+
+      case "Reports":
+        return (
+          <Reports
+            projects={projects}
+            tasks={tasks}
+            customers={customers}
+            employees={employees}
+          />
+        );
+
+      case "Settings":
+        return <Settings />;
+
+      default:
+        return (
+          <Dashboard
+            projects={projects}
+            tasks={tasks}
+            customers={customers}
+            setActivePage={setActivePage}
+          />
+        );
+    }
+  }
 
   return (
-    <div className="activity">
+    <div className="app-layout">
+      <aside className="sidebar">
+        <div className="brand">
+          <span className="brand-icon">🚀</span>
 
-      <span className="activity-icon">
-        {icon}
-      </span>
+          <div>
+            <strong>Autonomous OS</strong>
+            <small>STARTUP WORKSPACE</small>
+          </div>
+        </div>
 
-      <div>
-        <b>{title}</b>
-        <small>{time}</small>
-      </div>
+        <div className="sidebar-label">WORKSPACE</div>
 
-      <label>
-        {status}
-      </label>
+        <nav className="sidebar-nav">
+          {navigation.map((item) => (
+            <button
+              key={item.name}
+              className={`nav-item ${
+                activePage === item.name ? "active" : ""
+              }`}
+              onClick={() => setActivePage(item.name)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span>{item.name}</span>
+            </button>
+          ))}
+        </nav>
 
+        <div className="sidebar-bottom">
+          <div className="user-profile">
+            <div className="avatar">D</div>
+
+            <div>
+              <strong>Administrator</strong>
+              <small>Workspace Admin</small>
+            </div>
+          </div>
+
+          <button className="logout-btn" onClick={logout}>
+            ↪ Logout
+          </button>
+        </div>
+      </aside>
+
+      <main className="main-area">
+        <header className="topbar">
+          <div>
+            <span className="topbar-status">● All Systems Active</span>
+          </div>
+
+          <div className="topbar-right">
+            <span>Ctrl K</span>
+            <span className="topbar-avatar">D</span>
+          </div>
+        </header>
+
+        <div className="page-content">{renderPage()}</div>
+      </main>
     </div>
   );
 }
-
-
-function Risk({ icon, title, level, text }) {
-
-  return (
-    <div className="risk-card">
-
-      <div className="risk-icon">
-        {icon}
-      </div>
-
-      <h2>{title}</h2>
-
-      <span>{level} Risk</span>
-
-      <p>{text}</p>
-
-      <button>
-        View Details →
-      </button>
-
-    </div>
-  );
-}
-
-
-function Report({ icon, title, text }) {
-
-  return (
-    <div className="report-card">
-
-      <div className="report-icon">
-        {icon}
-      </div>
-
-      <h2>{title}</h2>
-
-      <p>{text}</p>
-
-      <button>
-        Generate Report →
-      </button>
-
-    </div>
-  );
-}
-
-export default App;

@@ -2,144 +2,231 @@ import { useState } from "react";
 import "./Login.css";
 
 function Login({ onLogin }) {
-  const [isSignup, setIsSignup] = useState(false);
+  const [isRegister, setIsRegister] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setError("");
 
-    const endpoint = isSignup
-      ? "http://localhost:5000/api/register"
-      : "http://localhost:5000/api/login";
+    const cleanEmail = email.trim().toLowerCase();
 
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(
-          isSignup
-            ? { name, email, password }
-            : { email, password }
-        ),
-      });
+    if (!cleanEmail || !password) {
+      setError("Please enter your email and password.");
+      return;
+    }
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.message || "Something went wrong");
+    if (isRegister) {
+      if (!name.trim()) {
+        setError("Please enter your full name.");
         return;
       }
 
-      if (isSignup) {
-        alert("Account created successfully! Please login.");
-        setIsSignup(false);
-        setName("");
-        setEmail("");
-        setPassword("");
-      } else {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        alert("Login successful!");
-
-        onLogin();
+      if (password.length < 6) {
+        setError("Password must contain at least 6 characters.");
+        return;
       }
-    } catch (error) {
-      alert("Cannot connect to backend. Make sure the server is running.");
+
+      if (password !== confirmPassword) {
+        setError("Passwords do not match.");
+        return;
+      }
+
+      const users = JSON.parse(
+        localStorage.getItem("autonomousOSUsers") || "[]"
+      );
+
+      const existingUser = users.find(
+        (savedUser) => savedUser.email.toLowerCase() === cleanEmail
+      );
+
+      if (existingUser) {
+        setError("An account with this email already exists.");
+        return;
+      }
+
+      const newUser = {
+        name: name.trim(),
+        email: cleanEmail,
+        password,
+      };
+
+      users.push(newUser);
+      localStorage.setItem("autonomousOSUsers", JSON.stringify(users));
+
+      onLogin({
+        name: newUser.name,
+        email: newUser.email,
+      });
+
+      return;
     }
+
+    if (
+      cleanEmail === "admin@autonomousos.com" &&
+      password === "admin123"
+    ) {
+      onLogin({
+        name: "Admin",
+        email: cleanEmail,
+      });
+
+      return;
+    }
+
+    const users = JSON.parse(
+      localStorage.getItem("autonomousOSUsers") || "[]"
+    );
+
+    const user = users.find(
+      (savedUser) =>
+        savedUser.email.toLowerCase() === cleanEmail &&
+        savedUser.password === password
+    );
+
+    if (user) {
+      onLogin({
+        name: user.name,
+        email: user.email,
+      });
+    } else {
+      setError("Invalid email or password. Please register or try again.");
+    }
+  };
+
+  const switchMode = () => {
+    setIsRegister(!isRegister);
+    setError("");
   };
 
   return (
     <div className="login-page">
-
-      <div className="login-background">
-        <div className="glow glow-one"></div>
-        <div className="glow glow-two"></div>
-      </div>
+      <div className="login-glow login-glow-one"></div>
+      <div className="login-glow login-glow-two"></div>
 
       <div className="login-container">
-
-        <div className="login-logo">
-          <div className="logo-icon">AI</div>
-          <h1>Autonomous Startup OS</h1>
-          <p>AI-Powered Startup Management System</p>
+        <div className="login-brand">
+          <div className="login-logo">⚡</div>
+          <h1>AUTONOMOUS OS</h1>
+          <p>Your startup. Your intelligence. Your future.</p>
         </div>
 
         <div className="login-card">
-
-          <h2>{isSignup ? "Create Account" : "Welcome Back"}</h2>
-
-          <p className="login-subtitle">
-            {isSignup
-              ? "Create your startup management account"
-              : "Sign in to your startup dashboard"}
-          </p>
+          <div className="login-heading">
+            <h2>{isRegister ? "Create Account" : "Welcome Back"}</h2>
+            <p>
+              {isRegister
+                ? "Create your account to get started."
+                : "Sign in to continue to your startup dashboard."}
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit}>
-
-            {isSignup && (
-              <div className="input-group">
-                <label>Full Name</label>
+            {isRegister && (
+              <div className="login-field">
+                <label htmlFor="login-name">Full Name</label>
                 <input
+                  id="login-name"
                   type="text"
-                  placeholder="Enter your name"
+                  placeholder="Enter your full name"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(event) => setName(event.target.value)}
                   required
                 />
               </div>
             )}
 
-            <div className="input-group">
-              <label>Email</label>
+            <div className="login-field">
+              <label htmlFor="login-email">Email Address</label>
               <input
+                id="login-email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) => setEmail(event.target.value)}
                 required
               />
             </div>
 
-            <div className="input-group">
-              <label>Password</label>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+            <div className="login-field">
+              <label htmlFor="login-password">Password</label>
+
+              <div className="password-input-wrap">
+                <input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                />
+
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
 
-            <button className="login-button" type="submit">
-              {isSignup ? "Create Account" : "Login"}
+            {isRegister && (
+              <div className="login-field">
+                <label htmlFor="login-confirm-password">
+                  Confirm Password
+                </label>
+
+                <input
+                  id="login-confirm-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(event) =>
+                    setConfirmPassword(event.target.value)
+                  }
+                  required
+                />
+              </div>
+            )}
+
+            {error && <div className="login-error">{error}</div>}
+
+            <button type="submit" className="login-submit">
+              {isRegister ? "Create Account →" : "Sign In →"}
             </button>
-
           </form>
 
-          <div className="switch-login">
+          <div className="login-switch">
+            <span>
+              {isRegister
+                ? "Already have an account?"
+                : "Don't have an account?"}
+            </span>
 
-            {isSignup
-              ? "Already have an account?"
-              : "Don't have an account?"}
-
-            <button
-              type="button"
-              onClick={() => setIsSignup(!isSignup)}
-            >
-              {isSignup ? " Login" : " Sign Up"}
+            <button type="button" onClick={switchMode}>
+              {isRegister ? "Sign In" : "Register"}
             </button>
-
           </div>
 
+          {!isRegister && (
+            <div className="demo-login">
+              <strong>Demo Login</strong>
+              <span>Email: admin@autonomousos.com</span>
+              <span>Password: admin123</span>
+            </div>
+          )}
         </div>
 
+        <p className="login-footer">
+          © 2026 Autonomous OS. All rights reserved.
+        </p>
       </div>
     </div>
   );
